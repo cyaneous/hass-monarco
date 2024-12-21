@@ -1,0 +1,7 @@
+{
+    "name": "Monarco",
+    "homeassistant": "2024.10.0",
+    "domains": ["fan"],
+    "render_readme": true,
+  }
+  

@@ -1,0 +1,22 @@
+{
+    "config": {
+      "abort": {
+        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      },
+      "flow_title": "Monarco HAT",
+      "step": {
+        "user": {
+          "title": "Configure Monarco HAT",
+          "data": {
+            "spi_device": "SPI device",
+            "spi_clkfreq": "SPI clock frequency"
+          }
+        }
+      },
+      "error": {
+        "invalid_input": "Invalid Input",
+        "invalid_output": "Invalid Output"
+      }
+    }
+  }
+  

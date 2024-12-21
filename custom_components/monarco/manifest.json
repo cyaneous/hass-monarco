@@ -1,0 +1,14 @@
+{
+  "domain": "monarco",
+  "name": "Monarco",
+  "version": "0.0.1",
+  "codeowners": ["@lupinglade"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/cyaneous/monarco",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "loggers": ["monarco"],
+  "requirements": ["spidev"],
+  "homeassistant": "2024.12.1"
+}
