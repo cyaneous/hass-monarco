@@ -26,7 +26,15 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SPEED_RANGE = (1, 8)  # off is not included
+SPEED_RANGE = (1, 8) # off is not included
+
+LUNOS_PRESET_MODES = [
+    "Auto",
+    "Low",
+    "Medium",
+    "High",
+    "Boost"
+]
 
 class LUNOS_FAN_V:
     AUTO = 0.0    # 0.0 - 0.4 (the controller works independently, according to internal sensors)
@@ -53,15 +61,15 @@ async def async_setup_entry(
 
     fans = []
 
-    name = config.get(CONF_AO1_NAME)
     device = config.get(CONF_AO1_DEVICE)
     if device in (DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO):
+        name = config.get(CONF_AO1_NAME)
         fan = LunosFan(name, device, monarco, 1)
         fans.append(fan)
 
-    name = config.get(CONF_AO2_NAME)
     device = config.get(CONF_AO2_DEVICE)
     if device in (DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO):
+        name = config.get(CONF_AO2_NAME)
         fan = LunosFan(name, device, monarco, 2)
         fans.append(fan)
 
@@ -78,9 +86,11 @@ class LunosFan(FanEntity):
         | FanEntityFeature.SET_SPEED
         | FanEntityFeature.TURN_ON
         | FanEntityFeature.TURN_OFF
+        | FanEntityFeature.PRESET_MODE
     )
     _attr_percentage = 0
     _attr_oscillating = True
+    preset_mode = None
 
     def __init__(self, name: str, model: str, monarco: Monarco, output: int) -> None:
         """Initialize the fan."""
@@ -95,6 +105,8 @@ class LunosFan(FanEntity):
             model=model,
             identifiers={(DOMAIN, f"AO{output}")},
         )
+        
+        self._attr_preset_modes = LUNOS_PRESET_MODES
 
         self._update_output()
 
@@ -161,15 +173,15 @@ class LunosFan(FanEntity):
             if not self.oscillating and volts >= LUNOS_FAN_V.STAGE_1:
                 volts += LUNOS_FAN_V.SUMMER_OFFSET
 
-        self._set_voltage(volts)
+        self._set_output_voltage(volts)
 
-    def _set_voltage(self, volts) -> None:
+    def _set_output_voltage(self, volts) -> None:
         _LOGGER.error("setting volts: %i", volts)
 
         match self._output:
             case 1:
                 _LOGGER.error("output 1")
-                self._monarco._tx_data.aout1 = aout_volts_to_u16(volts)
+                self._monarco.tx_data.aout1 = aout_volts_to_u16(volts)
             case 2:
                 _LOGGER.error("output 2")
-                self._monarco._tx_data.aout2 = aout_volts_to_u16(volts)
+                self._monarco.tx_data.aout2 = aout_volts_to_u16(volts)

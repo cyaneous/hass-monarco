@@ -1,6 +1,10 @@
 # Monarco HAT home assistant integration
 
-This integration adds Home Assistant support for the monarco HAT and Lunos fans via 0-10V outputs.
+This integration adds Home Assistant support for the monarco HAT.
+
+Currently supported devices:
+
+- Lunos e2/ego fans via 0-10V analog outputs
 
 ## Installation
 
