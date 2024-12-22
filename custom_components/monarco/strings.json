@@ -9,7 +9,9 @@
           "title": "Configure Monarco HAT",
           "data": {
             "spi_device": "SPI device",
-            "spi_clkfreq": "SPI clock frequency"
+            "spi_clkfreq": "SPI clock frequency",
+            "analog_output_1": "Analog Output 1",
+            "analog_output_2": "Analog Output 2"
           }
         }
       },

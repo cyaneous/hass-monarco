@@ -4,7 +4,7 @@ from typing import Optional, Any
 import logging
 
 from homeassistant.core import HomeAssistant
-from homeassistant.components.fan import FanEntity, OSCILLATE, SUPPORT_PERCENTAGE, TURN_ON, TURN_OFF
+from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.percentage import ranged_value_to_percentage, percentage_to_ranged_value
 from homeassistant.util.scaling import int_states_in_range
@@ -14,9 +14,10 @@ from homeassistant.util.scaling import int_states_in_range
 
 from . import MHConfigEntry
 from .const import (
-    CONF_NAME,
-    CONF_FANS,
-    CONF_OUTPUT,
+    CONF_AO1_NAME,
+    CONF_AO1_DEVICE,
+    CONF_AO2_NAME,
+    CONF_AO2_DEVICE,
     MANUFACTURER_LUNOS,
     DEVICE_MODEL_LUNOS_E2,
     DEVICE_MODEL_LUNOS_EGO,
@@ -35,18 +36,23 @@ async def async_setup_entry(
     """Set up the Monarco Fan platform."""
 
     config = config_entry.data
-    # spi_device = config.get(CONF_SPI_DEVICE)
-    # spi_clkfreq = config.get(CONF_SPI_CLKFREQ)
-    # platform = "Linux"
 
     monarco = []
     # monarco = config_entry.monarco # MonarcoContext()
 
     fans = []
-    for fan_conf in config.get(CONF_FANS):
-        name = fan_conf.get(CONF_NAME)
-        output = fan_conf.get(CONF_OUTPUT)
-        fans.append(LunosFan(name, monarco, output))
+
+    name = config.get(CONF_AO1_NAME)
+    device = config.get(CONF_AO1_DEVICE)
+    if device == DEVICE_MODEL_LUNOS_E2 or device == DEVICE_MODEL_LUNOS_EGO:
+        fan = LunosFan(name, device, monarco, 0)
+        fans.append(fan)
+
+    name = config.get(CONF_AO2_NAME)
+    device = config.get(CONF_AO2_DEVICE)
+    if device == DEVICE_MODEL_LUNOS_E2 or device == DEVICE_MODEL_LUNOS_EGO:
+        fan = LunosFan(name, device, monarco, 1)
+        fans.append(fan)
 
     async_add_entities(fans)
 
@@ -57,21 +63,26 @@ class LunosFan(FanEntity):
     _attr_name = None
     _attr_should_poll = False
 
-    _attr_supported_features = (OSCILLATE, SUPPORT_PERCENTAGE, TURN_OFF, TURN_ON)
+    _attr_supported_features = (
+        FanEntityFeature.OSCILLATE,
+        FanEntityFeature.TURN_OFF,
+        FanEntityFeature.SET_SPEED,
+        FanEntityFeature.TURN_ON,
+    )
     _attr_is_on = False
     _attr_percentage = 0
     _attr_oscillating = False
 
     # FIXME: monarco: Monarco
-    def __init__(self, name: str, monarco: Any, output: int) -> None:
+    def __init__(self, name: str, model: str, monarco: Any, output: int) -> None:
         """Initialize the fan."""
 
         self._monarco = monarco
         self._attr_unique_id = f"lunos_fan_{output}"
         self._attr_device_info = DeviceInfo(
-            name=f"{MANUFACTURER_LUNOS} {DEVICE_MODEL_LUNOS_E2} {output}",
+            name=name,
             manufacturer=MANUFACTURER_LUNOS,
-            model=DEVICE_MODEL_LUNOS_E2,
+            model=model,
         )
 
     async def async_turn_on(self, speed: Optional[str] = None, percentage: Optional[int] = None, preset_mode: Optional[str] = None, **kwargs: Any) -> None:

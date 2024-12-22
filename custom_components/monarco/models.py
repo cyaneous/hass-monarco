@@ -4,7 +4,11 @@ from dataclasses import dataclass
 
 #from .monarco_hat.monarco import Monarco
 
-from .const import DEFAULT_SPI_DEVICE, DEFAULT_SPI_CLKFREQ
+from .const import (
+    DEFAULT_SPI_DEVICE,
+    DEFAULT_SPI_CLKFREQ,
+    DEFAULT_WATCHDOG_TIMEOUT,
+)
 
 
 @dataclass(slots=True)
@@ -13,6 +17,7 @@ class MHConfig:
 
     spi_device: str = DEFAULT_SPI_DEVICE
     spi_clkfreq: int = DEFAULT_SPI_CLKFREQ
+    watchdog_timeout: int = DEFAULT_WATCHDOG_TIMEOUT
 
 
 @dataclass(slots=True)

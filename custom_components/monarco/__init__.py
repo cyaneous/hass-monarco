@@ -8,7 +8,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .const import DOMAIN, CONF_NAME, CONF_SPI_DEVICE, CONF_SPI_CLKFREQ, CONF_FANS
+from .const import (
+    DOMAIN,
+    CONF_SPI_DEVICE,
+    CONF_SPI_CLKFREQ,
+    CONF_WATCHDOG_TIMEOUT,
+)
 from .models import MHConfig, MHConfigEntryData
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,27 +27,31 @@ PLATFORMS = [
 
 async def async_setup_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     """Set up Monarco Fan from a config entry."""
-    
-    # mac_address: str = entry.unique_id
-    # pin: str = entry.data.get("pin")
+
+    spi_device: str = entry.data.get(CONF_SPI_DEVICE)
+    spi_clkfreq: int = entry.data.get(CONF_SPI_CLKFREQ)
+    watchdog_timeout: int = entry.data.get(CONF_WATCHDOG_TIMEOUT)
 
     # if TYPE_CHECKING:
-    #     assert mac_address is not None
-    #     assert pin is not None
-
-    # ma_config = MHConfig(
-    #     mac_address=mac_address,
-    #     pin=pin
-    # )
-    
-    hass.data.setdefault(DOMAIN, {})
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
-    
-    spi_device = entry.data.get(CONF_SPI_DEVICE)
-    spi_clkfreq = entry.data.get(CONF_SPI_CLKFREQ)
+    #     assert spi_device is not None
+    #     assert spi_clkfreq is not None
+    #     assert watchdog_timeout is not None
 
     # cxt = MonarcoContext()
     # monarco_init(cxt, spi_device, spi_clkfreq, "Linux")
+
+    # if device is None:
+    #     raise ConfigEntryNotReady(f"Failed to initialize the Monarco HAT")
+
+    #hass.data.setdefault(DOMAIN, {})
+
+    # entry.runtime_data = MAConfigEntryData(
+    #     ma_config=ma_config,
+    #     thermostat=thermostat
+    # )
+    
+    entry.async_on_unload(entry.add_update_listener(update_listener))
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
     # entry.async_create_background_task(
     #     hass, _async_run_monarco(hass, entry), entry.entry_id
@@ -55,6 +64,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     
     await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     return True
+
+async def update_listener(hass: HomeAssistant, entry: MHConfigEntry) -> None:
+    """Handle config entry update."""
+
+    await hass.config_entries.async_reload(entry.entry_id)
 
 async def _async_run_monarco(hass: HomeAssistant, entry: MHConfigEntry) -> None:
     """Run the monarco update loop."""
