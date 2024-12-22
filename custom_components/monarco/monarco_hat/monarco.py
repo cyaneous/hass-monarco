@@ -48,12 +48,12 @@ class Monarco:
 
         tx_data = self._tx_data.pack()
         self._tx_data.crc = self.monarco_crc16(tx_data[:24])
-        self._tx_data = self._tx_data.pack()
+        tx_data = self._tx_data.pack()
 
-        _LOGGER.error("TX: %s", self._tx_data.hex())
+        # _LOGGER.error("TX: %s", tx_data.hex())
         rx_data = self._spi_fd.xfer(tx_data, 400000)
 
-        _LOGGER.error("RX: %s", bytes(rx_data).hex())
+        # _LOGGER.error("RX: %s", bytes(rx_data).hex())
         #if struct.unpack_from('<H', rx_data, 24)[0] != monarco_crc16(rx_data[:24]):
         if struct.unpack_from('<H', bytes(rx_data), 24)[0] != self.monarco_crc16(rx_data[:24]):
             if self._err_throttle_crc == 0:
@@ -66,7 +66,7 @@ class Monarco:
                 _LOGGER.error("monarco_main: Invalid RX CRC (%i times)", self._err_throttle_crc)
                 self._err_throttle_crc = 0
 
-        self._rx_data.unpack(rx_data)
+        self._rx_data.unpack(bytes(rx_data))
         self._monarco_sdc_rx()
 
         return 0
@@ -139,5 +139,17 @@ class Monarco:
     def monarco_crc16(self, data) -> int:
         crc = 0xFFFF
         for byte in data:
-            crc = (crc >> 8) ^ CRC16_TABLE[(crc ^ byte) & 0xFF]
+            crc = (crc >> 8) ^ CRC16_TABLE[(byte ^ crc) & 0xFF]
         return crc
+
+    # def monarco_crc16(self, data) -> int:
+    #     crc = 0xFFFF
+    #     for byte in data:
+    #         crc ^= byte
+    #         for i in range(8):
+    #             if crc & 1:
+    #                 crc >>= 1
+    #                 crc ^= 0xA001
+    #             else:
+    #                 crc >>= 1
+    #     return crc

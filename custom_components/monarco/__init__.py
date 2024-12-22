@@ -44,9 +44,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     try:
         # monarco = Monarco(spi_device, spi_clkfreq)
         monarco = Monarco("0.0")
-        monarco._tx_data.aout1 = aout_volts_to_u16(4.7)
-        monarco._tx_data.aout2 = aout_volts_to_u16(4.7)
-        monarco.run()
+        monarco._tx_data.aout1 = aout_volts_to_u16(3.2)
+        monarco._tx_data.aout2 = aout_volts_to_u16(4.2)
+        # monarco.run()
     except MHException as ex:
         raise ConfigEntryNotReady(f"Failed to initialize the Monarco HAT: {ex}") from ex
 
@@ -60,9 +60,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # entry.async_create_background_task(
-    #     hass, _async_run_monarco(hass, entry), entry.entry_id
-    # )
+    entry.async_create_background_task(
+        hass, _async_run_monarco(hass, entry), entry.entry_id
+    )
 
     return True
 
@@ -85,8 +85,8 @@ async def _async_run_monarco(hass: HomeAssistant, entry: MHConfigEntry) -> None:
     while True:
         try:
             # async with thermostat:
-            await monarco.run()
+            monarco.run()
         except MHException as ex:
             _LOGGER.error("Exception caught in monarco loop: %s", ex)
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
