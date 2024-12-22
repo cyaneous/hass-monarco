@@ -141,15 +141,3 @@ class Monarco:
         for byte in data:
             crc = (crc >> 8) ^ CRC16_TABLE[(byte ^ crc) & 0xFF]
         return crc
-
-    # def monarco_crc16(self, data) -> int:
-    #     crc = 0xFFFF
-    #     for byte in data:
-    #         crc ^= byte
-    #         for i in range(8):
-    #             if crc & 1:
-    #                 crc >>= 1
-    #                 crc ^= 0xA001
-    #             else:
-    #                 crc >>= 1
-    #     return crc

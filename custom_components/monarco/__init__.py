@@ -44,8 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     try:
         # monarco = Monarco(spi_device, spi_clkfreq)
         monarco = Monarco("0.0")
-        monarco._tx_data.aout1 = aout_volts_to_u16(3.2)
-        monarco._tx_data.aout2 = aout_volts_to_u16(4.2)
+        # monarco._tx_data.aout1 = aout_volts_to_u16(3.2)
+        # monarco._tx_data.aout2 = aout_volts_to_u16(4.2)
         # monarco.run()
     except MHException as ex:
         raise ConfigEntryNotReady(f"Failed to initialize the Monarco HAT: {ex}") from ex
