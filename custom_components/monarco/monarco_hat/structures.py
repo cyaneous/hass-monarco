@@ -4,8 +4,6 @@ import struct
 from collections import namedtuple
 
 
-MONARCO_STRUCT_SIZE = 26
-
 # Define the SDC structure
 MonarcoStructSDC = namedtuple('MonarcoStructSDC', 'value address write error reserved')
 MonarcoStructControlByte = namedtuple('MonarcoStructControlByte', 'status_led_mask status_led_value ow_shutdown reserved1 cnt1_reset cnt2_reset sign_of_life_a sign_of_life_b')
