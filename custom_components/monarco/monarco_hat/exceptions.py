@@ -3,27 +3,20 @@
 __all__ = [
     "MHException",
     "MHConnectionException",
+    "MHRuntimeException",
     "MHTimeoutException",
-    "MHStateException",
-    "MHInternalException",
 ]
 
 
 class MHException(Exception):
     """Base exception."""
 
-
 class MHConnectionException(MHException):
-    """Exception for connection errors."""
+    """Exception for runtime errors."""
+
+class MHRuntimeException(MHException):
+    """Exception for runtime errors."""
 
 
 class MHTimeoutException(MHException):
     """Exception for timeouts."""
-
-
-class MHStateException(MHException):
-    """Exception for invalid states."""
-
-
-class MHInternalException(MHException):
-    """Exception for internal errors."""

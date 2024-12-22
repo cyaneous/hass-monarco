@@ -48,11 +48,6 @@ class MonarcoStructTX:
             self.crc
         )
 
-    def unpack(self, data):
-        unpacked_data = struct.unpack('<HBBBBBBHHHHHHHHH', data)
-        self.sdc_req = MonarcoStructSDC(unpacked_data[0], unpacked_data[1] & 0xFFF, (unpacked_data[1] >> 12) & 1, (unpacked_data[1] >> 13) & 1, (unpacked_data[1] >> 14) & 3)
-        self.control_byte = MonarcoStructControlByte(unpacked_data[2] & 1, (unpacked_data[2] >> 1) & 1, (unpacked_data[2] >> 2) & 1, (unpacked_data[2] >> 3) & 1, (unpacked_data[2] >> 4) & 1, (unpacked_data[2] >> 5) & 1, (unpacked_data[2] >> 6) & 3)
-        self.led_mask, self.led_value, self.dout, self.pwm1_div, self.pwm1a_dc, self.pwm1b_dc, self.pwm1c_dc, self.pwm2_div, self.pwm2a_dc, self.aout1, self.aout2, self.crc = unpacked_data[3:]
 
 # Define the RX structure
 class MonarcoStructRX:

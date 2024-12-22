@@ -4,25 +4,9 @@ from dataclasses import dataclass
 
 from .monarco_hat import Monarco
 
-from .const import (
-    DEFAULT_SPI_DEVICE,
-    DEFAULT_SPI_CLKFREQ,
-    DEFAULT_WATCHDOG_TIMEOUT,
-)
-
-
-@dataclass(slots=True)
-class MHConfig:
-    """Config for a single monarco entity."""
-
-    spi_device: str = DEFAULT_SPI_DEVICE
-    spi_clkfreq: int = DEFAULT_SPI_CLKFREQ
-    watchdog_timeout: int = DEFAULT_WATCHDOG_TIMEOUT
-
 
 @dataclass(slots=True)
 class MHConfigEntryData:
     """Config entry for a single monarco entity."""
 
-    #mh_config: MHConfig
     monarco: Monarco

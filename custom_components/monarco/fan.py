@@ -9,7 +9,6 @@ from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.util.percentage import ranged_value_to_percentage, percentage_to_ranged_value
-from homeassistant.util.scaling import int_states_in_range
 
 from .monarco_hat import Monarco, aout_volts_to_u16
 
@@ -72,7 +71,6 @@ class LunosFan(FanEntity):
     """Fan entity represneting a Lunos fan."""
 
     _attr_entity_has_name = True
-    _attr_name = None
     _attr_should_poll = False
 
     _attr_supported_features = (
@@ -82,7 +80,7 @@ class LunosFan(FanEntity):
         | FanEntityFeature.TURN_OFF
     )
     _attr_percentage = 0
-    _attr_oscillating = False
+    _attr_oscillating = True
 
     def __init__(self, name: str, model: str, monarco: Monarco, output: int) -> None:
         """Initialize the fan."""
@@ -97,7 +95,7 @@ class LunosFan(FanEntity):
             model=model,
             identifiers={(DOMAIN, f"AO{output}")},
         )
-        
+
         self._update_output()
 
 
@@ -115,17 +113,10 @@ class LunosFan(FanEntity):
         else:
             await self.async_set_percentage(100)
 
-        #self._attr_is_on = True
-        # self.async_write_ha_state()
-        # self._update_output()
-
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the fan."""
 
         await self.async_set_percentage(0)
-        # self._attr_is_on = False
-        # self.async_write_ha_state()
-        # self._update_output()
 
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""

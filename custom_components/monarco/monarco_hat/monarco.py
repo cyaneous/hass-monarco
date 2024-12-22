@@ -1,12 +1,13 @@
 """Implementation of the monarco_hat library."""
 
 import logging
-
-import spidev
 import struct
 
+import spidev
+
 from .const import CRC16_TABLE
-from .structures import MonarcoSDCItem, MonarcoStructTX, MonarcoStructRX
+from .exceptions import MHConnectionException, MHRuntimeException, MHTimeoutException
+from .structures import MonarcoStructSDC, MonarcoSDCItem, MonarcoStructTX, MonarcoStructRX
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,57 +22,58 @@ class Monarco:
         self._sdc_size = 0
         self._sdc_idx = 0
         self._sdc_items = [MonarcoSDCItem() for _ in range(MONARCO_SDC_ITEMS_SIZE)]
-        self._err_throttle_crc = 0
 
         self._open(spi_device, spi_clkfreq)
         _LOGGER.info("monarco_init: OK")
 
     def _open(self, spi_device, spi_clkfreq) -> None:
+        """Opens the SPI interface connection."""
+
         self._spi_fd = spidev.SpiDev()
         bus, device = map(int, spi_device.split('.'))
         self._spi_fd.open(bus, device)
+        
+        if not self._spi_fd:
+            raise MHConnectionException("Failed to open the SPI interface")
+        
         self._spi_fd.max_speed_hz = spi_clkfreq
         self._spi_fd.mode = 0b00
         self._spi_fd.bits_per_word = 8
 
     def close(self):
+        """Closes the SPI interface connection."""
+        
         if self._spi_fd:
             self._spi_fd.close()
             self._spi_fd = None
 
     def run(self) -> int:
+        """Runs the main send and receive functionality."""
+        
         if not self._spi_fd:
-            _LOGGER.error("monarco_main: SPI not open, exiting")
-            return -1
+            raise MHRuntimeException("SPI is not open")
 
-        self._monarco_sdc_tx()
+        self._sdc_tx()
 
         tx_data = self._tx_data.pack()
-        self._tx_data.crc = self.monarco_crc16(tx_data[:24])
+        self._tx_data.crc = self._monarco_crc16(tx_data[:24])
         tx_data = self._tx_data.pack()
 
-        # _LOGGER.error("TX: %s", tx_data.hex())
-        rx_data = self._spi_fd.xfer(tx_data, 400000)
+        # _LOGGER.debug("TX: %s", tx_data.hex())
+        rx_data = bytes(self._spi_fd.xfer(tx_data))
 
-        # _LOGGER.error("RX: %s", bytes(rx_data).hex())
-        #if struct.unpack_from('<H', rx_data, 24)[0] != monarco_crc16(rx_data[:24]):
-        if struct.unpack_from('<H', bytes(rx_data), 24)[0] != self.monarco_crc16(rx_data[:24]):
-            if self._err_throttle_crc == 0:
-                _LOGGER.error("monarco_main: Invalid RX CRC")
-            if self._err_throttle_crc < (1 << 31):
-                self._err_throttle_crc += 1
-            return -3
-        else:
-            if self._err_throttle_crc:
-                _LOGGER.error("monarco_main: Invalid RX CRC (%i times)", self._err_throttle_crc)
-                self._err_throttle_crc = 0
+        # _LOGGER.debug("RX: %s", rx_data.hex())
+        if struct.unpack_from('<H', rx_data, 24)[0] != self._monarco_crc16(rx_data[:24]):
+            raise MHRuntimeException("Invalid RX CRC")
 
-        self._rx_data.unpack(bytes(rx_data))
-        self._monarco_sdc_rx()
+        self._rx_data.unpack(rx_data)
+        self._sdc_rx()
 
         return 0
 
-    def _monarco_sdc_tx(self):
+    def _sdc_tx(self):
+        """Writes SDC."""
+
         idx_last = self._sdc_idx
 
         if self._sdc_idx >= self._sdc_size:
@@ -83,9 +85,7 @@ class Monarco:
             if item.busy < (1 << 31):
                 item.busy += 1
             if item.busy == 10:
-                _LOGGER.error("monarco_sdc_tx: SDC item %i %s ADDR=%i timeout", self._sdc_idx, 'W' if item.write else 'R', item.address)
-                # _LOGGER.error("monarco_sdc_tx: SDC item %i %s ADDR=0x%s timeout", self._sdc_idx, 'W' if item.write else 'R', item.address:03X)
-            return
+                raise MHTimeoutException(f"_sdc_tx: SDC item {self._sdc_idx} {'W' if item.write else 'R'} ADDR=0x{item.address:03X} timeout")
 
         while True:
             if self._sdc_items[self._sdc_idx].factor > 0:
@@ -102,8 +102,7 @@ class Monarco:
                 self._sdc_idx = 0
 
             if self._sdc_idx == idx_last:
-                _LOGGER.error("monarco_sdc_tx: No SDC request in this cycle")
-                return
+                raise MHRuntimeException(f"_sdc_tx: No SDC request in this cycle")
 
         item = self._sdc_items[self._sdc_idx]
 
@@ -111,7 +110,9 @@ class Monarco:
         item.busy = 1
         item.request = 0
 
-    def _monarco_sdc_rx(self):
+    def _sdc_rx(self):
+        """Reads SDC."""
+        
         if self._sdc_idx >= self._sdc_size:
             return
 
@@ -124,8 +125,7 @@ class Monarco:
             return
 
         if self._rx_data.sdc_resp.error and (not item.error or item.value != self._rx_data.sdc_resp.value):
-            _LOGGER.error("monarco_sdc_rx: SDC item %i %s ADDR=%i ERROR=%i", self._sdc_idx, 'W' if item.write else 'R', item.address, self._rx_data.sdc_resp.value)
-            # _LOGGER.error(f"monarco_sdc_rx: SDC item {self._sdc_idx} {'W' if item.write else 'R'} ADDR=0x{item.address:03X} ERROR=0x{self._rx_data[4:6].hex()}")
+            raise MHRuntimeException(f"_sdc_rx: SDC item {self._sdc_idx} {'W' if item.write else 'R'} ADDR=0x{item.address:03X} ERROR=0x{self._rx_data.sdc_resp.value:03X}")
 
         item.busy = 0
         item.done = 1
@@ -136,7 +136,9 @@ class Monarco:
         if self._sdc_idx == self._sdc_size:
             self._sdc_idx = 0
 
-    def monarco_crc16(self, data) -> int:
+    def _monarco_crc16(self, data) -> int:
+        """Modbus CRC-16 calculation using a table."""
+
         crc = 0xFFFF
         for byte in data:
             crc = (crc >> 8) ^ CRC16_TABLE[(byte ^ crc) & 0xFF]

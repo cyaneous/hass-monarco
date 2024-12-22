@@ -10,12 +10,5 @@ Simply install via hacs or custom_components and your thermostat should be autom
 
 ## TODO
 
-fan:
-  - platform: monarco_fan
-    spi_device: "0.0"
-    spi_clkfreq: 1000000
-    fans:
-      - name: "Fan 1"
-        output: 1
-      - name: "Fan 2"
-        output: 2
+- test/fully implement SDC support in monarco_hat
+- implement setting Watchdog Timeout SDC
