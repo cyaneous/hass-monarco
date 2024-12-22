@@ -23,23 +23,23 @@ from .const import (
 )
 
 
-AO1_SCHEMA = vol.Schema({
-    vol.Required(CONF_AO1_NAME): cv.string,
-    CONF_AO1_DEVICE: selector({
-        "select": {
-            "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
-        }
-    })
-})
+# AO1_SCHEMA = vol.Schema({
+#     vol.Required(CONF_AO1_NAME): cv.string,
+#     CONF_AO1_DEVICE: selector({
+#         "select": {
+#             "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+#         }
+#     })
+# })
 
-AO2_SCHEMA = vol.Schema({
-    vol.Required(CONF_AO2_NAME): cv.string,
-    CONF_AO2_DEVICE: selector({
-        "select": {
-            "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
-        }
-    })
-})
+# AO2_SCHEMA = vol.Schema({
+#     vol.Required(CONF_AO2_NAME): cv.string,
+#     CONF_AO2_DEVICE: selector({
+#         "select": {
+#             "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+#         }
+#     })
+# })
 
 # TODO: add note about watchdog: The Raspberry Pi will be power-cycled by the watchdog after this many seconds of timeout. Set to zero to disable.
 
@@ -47,14 +47,26 @@ CONFIG_SCHEMA = vol.Schema({
     vol.Required(CONF_SPI_DEVICE, default=DEFAULT_SPI_DEVICE): cv.string,
     vol.Required(CONF_SPI_CLKFREQ, default=DEFAULT_SPI_CLKFREQ): cv.positive_int,
     vol.Required(CONF_WATCHDOG_TIMEOUT, default=DEFAULT_WATCHDOG_TIMEOUT): cv.positive_int,
-    "analog_output_1": section(
-        AO1_SCHEMA,
-        {"collapsed": False},
-    ),
-    "analog_output_2": section(
-        AO2_SCHEMA,
-        {"collapsed": False},
-    ),
+    vol.Required(CONF_AO1_NAME): cv.string,
+    CONF_AO1_DEVICE: selector({
+        "select": {
+            "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+        }
+    }),
+    vol.Required(CONF_AO2_NAME): cv.string,
+    CONF_AO2_DEVICE: selector({
+        "select": {
+            "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+        }
+    })
+    # "analog_output_1": section(
+    #     AO1_SCHEMA,
+    #     {"collapsed": False},
+    # ),
+    # "analog_output_2": section(
+    #     AO2_SCHEMA,
+    #     {"collapsed": False},
+    # ),
 }, extra=vol.ALLOW_EXTRA)
 
 

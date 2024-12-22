@@ -6,14 +6,15 @@ import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.util.percentage import ranged_value_to_percentage, percentage_to_ranged_value
 from homeassistant.util.scaling import int_states_in_range
 
-#from .monarco_hat.monarco import MonarcoContext, monarco_init, monarco_main, monarco_exit
-#from .monarco_hat import monarco_util
+from .monarco_hat import Monarco
 
 from . import MHConfigEntry
 from .const import (
+    DOMAIN,
     CONF_AO1_NAME,
     CONF_AO1_DEVICE,
     CONF_AO2_NAME,
@@ -44,13 +45,13 @@ async def async_setup_entry(
 
     name = config.get(CONF_AO1_NAME)
     device = config.get(CONF_AO1_DEVICE)
-    if device == DEVICE_MODEL_LUNOS_E2 or device == DEVICE_MODEL_LUNOS_EGO:
+    if device in (DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO):
         fan = LunosFan(name, device, monarco, 0)
         fans.append(fan)
 
     name = config.get(CONF_AO2_NAME)
     device = config.get(CONF_AO2_DEVICE)
-    if device == DEVICE_MODEL_LUNOS_E2 or device == DEVICE_MODEL_LUNOS_EGO:
+    if device in (DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO):
         fan = LunosFan(name, device, monarco, 1)
         fans.append(fan)
 
@@ -64,17 +65,16 @@ class LunosFan(FanEntity):
     _attr_should_poll = False
 
     _attr_supported_features = (
-        FanEntityFeature.OSCILLATE,
-        FanEntityFeature.TURN_OFF,
-        FanEntityFeature.SET_SPEED,
-        FanEntityFeature.TURN_ON,
+        FanEntityFeature.OSCILLATE
+        | FanEntityFeature.SET_SPEED
+        | FanEntityFeature.TURN_ON
+        | FanEntityFeature.TURN_OFF
     )
     _attr_is_on = False
     _attr_percentage = 0
     _attr_oscillating = False
 
-    # FIXME: monarco: Monarco
-    def __init__(self, name: str, model: str, monarco: Any, output: int) -> None:
+    def __init__(self, name: str, model: str, monarco: Monarco, output: int) -> None:
         """Initialize the fan."""
 
         self._monarco = monarco
@@ -83,9 +83,15 @@ class LunosFan(FanEntity):
             name=name,
             manufacturer=MANUFACTURER_LUNOS,
             model=model,
+            identifiers={(DOMAIN, f"AO{output}")},
         )
 
-    async def async_turn_on(self, speed: Optional[str] = None, percentage: Optional[int] = None, preset_mode: Optional[str] = None, **kwargs: Any) -> None:
+    async def async_turn_on(
+        self, speed: Optional[str] = None,
+        percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None,
+        **kwargs: Any
+    ) -> None:
         """Turn on the fan."""
 
     #     if speed is not None:
@@ -113,7 +119,7 @@ class LunosFan(FanEntity):
         #     self._cxt.tx_data.aout1 = voltage_u16
         # elif self._output == 2:
         #     self._cxt.tx_data.aout2 = voltage_u16
-        # monarco_main(self._cxt)
+        # monarco.run()
 
     async def async_oscillate(self, oscillating: bool) -> None:
         """Oscillate the fan."""
@@ -123,4 +129,4 @@ class LunosFan(FanEntity):
     async def async_update(self):
         """Fetch new state data for the fan."""
 
-        # monarco_main(self._cxt)
+        # monarco.run()

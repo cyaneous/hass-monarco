@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-#from .monarco_hat.monarco import Monarco
+from .monarco_hat import Monarco
 
 from .const import (
     DEFAULT_SPI_DEVICE,
@@ -24,5 +24,5 @@ class MHConfig:
 class MHConfigEntryData:
     """Config entry for a single monarco entity."""
 
-    mh_config: MHConfig
-    #monarco: Monarco
+    #mh_config: MHConfig
+    monarco: Monarco

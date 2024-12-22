@@ -8,6 +8,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from .monarco_hat import Monarco, MHException, aout_volts_to_u16
+
 from .const import (
     DOMAIN,
     CONF_SPI_DEVICE,
@@ -37,31 +39,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     #     assert spi_clkfreq is not None
     #     assert watchdog_timeout is not None
 
-    # cxt = MonarcoContext()
-    # monarco_init(cxt, spi_device, spi_clkfreq, "Linux")
 
-    # if device is None:
-    #     raise ConfigEntryNotReady(f"Failed to initialize the Monarco HAT")
+    monarco: Monarco | None = None
+    try:
+        # monarco = Monarco(spi_device, spi_clkfreq)
+        monarco = Monarco("0.0")
+        monarco._tx_data.aout1 = aout_volts_to_u16(4.7)
+        monarco._tx_data.aout2 = aout_volts_to_u16(4.7)
+        monarco.run()
+    except MHException as ex:
+        raise ConfigEntryNotReady(f"Failed to initialize the Monarco HAT: {ex}") from ex
 
     #hass.data.setdefault(DOMAIN, {})
 
-    # entry.runtime_data = MAConfigEntryData(
-    #     ma_config=ma_config,
-    #     thermostat=thermostat
-    # )
-    
+    entry.runtime_data = MHConfigEntryData(
+        #mh_config=mh_config,
+        monarco=monarco
+    )
+
     entry.async_on_unload(entry.add_update_listener(update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    
+
     # entry.async_create_background_task(
     #     hass, _async_run_monarco(hass, entry), entry.entry_id
     # )
-    
+
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: MHConfigEntry) -> bool:
     """Unload a config entry."""
-    
+
     await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     return True
 
@@ -73,15 +80,13 @@ async def update_listener(hass: HomeAssistant, entry: MHConfigEntry) -> None:
 async def _async_run_monarco(hass: HomeAssistant, entry: MHConfigEntry) -> None:
     """Run the monarco update loop."""
 
-    # monarco = entry.runtime_data.monarco
-    # mac_address = entry.runtime_data.ma_config.mac_address
-    # scan_interval = entry.runtime_data.ma_config.scan_interval
+    monarco = entry.runtime_data.monarco
 
-    # while True:
-    #     try:
-    #         # async with thermostat:
-    #         #     await thermostat.async_get_status()
-    #     except MHException as ex:
-    #         _LOGGER.error("Exception caught in monarco loop: %s", ex)
+    while True:
+        try:
+            # async with thermostat:
+            await monarco.run()
+        except MHException as ex:
+            _LOGGER.error("Exception caught in monarco loop: %s", ex)
 
-    #     await asyncio.sleep(1)
+        await asyncio.sleep(1)
