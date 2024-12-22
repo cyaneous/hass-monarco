@@ -28,7 +28,7 @@ class MonarcoStructTX:
         self.crc = 0
 
     def pack(self):
-        return struct.pack('<HHBBBBHHHHHHHHH', 
+        return struct.pack('<HHBBBBHHHHHHHHH',
             self.sdc_req.value, 
             (self.sdc_req.address & 0xFFF) | (self.sdc_req.write << 12) | (self.sdc_req.error << 13) | (self.sdc_req.reserved << 14), 
             self.control_byte.status_led_mask | (self.control_byte.status_led_value << 1) | (self.control_byte.ow_shutdown << 2) | (self.control_byte.reserved1 << 3) | (self.control_byte.cnt1_reset << 4) | (self.control_byte.cnt2_reset << 5) | (self.control_byte.sign_of_life_a << 6) | (self.control_byte.sign_of_life_b << 7),
@@ -64,6 +64,7 @@ class MonarcoStructRX:
         unpacked_data = struct.unpack('<HHBHBIIIHHH', data)
         self.sdc_resp = MonarcoStructSDC(unpacked_data[0], unpacked_data[1] & 0xFFF, (unpacked_data[1] >> 12) & 1, (unpacked_data[1] >> 13) & 1, (unpacked_data[1] >> 14) & 3)
         self.status_byte, _, self.din, self.cnt1, self.cnt2, self.cnt3, self.ain1, self.ain2, self.crc = unpacked_data[2:]
+
 
 # Define SDC Item structure
 class MonarcoSDCItem:
