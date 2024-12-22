@@ -81,7 +81,6 @@ class LunosFan(FanEntity):
         | FanEntityFeature.TURN_ON
         | FanEntityFeature.TURN_OFF
     )
-    _attr_is_on = False
     _attr_percentage = 0
     _attr_oscillating = False
 
@@ -103,7 +102,8 @@ class LunosFan(FanEntity):
 
 
     async def async_turn_on(
-        self, speed: Optional[str] = None,
+        self,
+        speed: Optional[str] = None,
         percentage: Optional[int] = None,
         preset_mode: Optional[str] = None,
         **kwargs: Any
@@ -111,19 +111,21 @@ class LunosFan(FanEntity):
         """Turn on the fan."""
 
         if percentage is not None:
-            self._attr_percentage = percentage
+            await self.async_set_percentage(percentage)
+        else:
+            await self.async_set_percentage(100)
 
-        self._attr_is_on = True
-        self.async_write_ha_state()
-        self._update_output()
+        #self._attr_is_on = True
+        # self.async_write_ha_state()
+        # self._update_output()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the fan."""
 
-    #     self.set_percentage(0)
-        self._attr_is_on = False
-        self.async_write_ha_state()
-        self._update_output()
+        await self.async_set_percentage(0)
+        # self._attr_is_on = False
+        # self.async_write_ha_state()
+        # self._update_output()
 
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
@@ -138,11 +140,13 @@ class LunosFan(FanEntity):
         self._attr_oscillating = oscillating
         self.async_write_ha_state()
         self._update_output()
-        
+
     def _update_output(self) -> None:
-        volts: float
-        if self._attr_is_on:
-            value_in_range = 6 #math.ceil(percentage_to_ranged_value(SPEED_RANGE, self._attr_percentage))
+        volts = LUNOS_FAN_V.STAGE_0
+        if self.is_on:
+            value_in_range = math.ceil(percentage_to_ranged_value(SPEED_RANGE, self.percentage))
+
+            _LOGGER.error("value in range: %i", value_in_range)
             match value_in_range:
                 case 0: 
                     volts = LUNOS_FAN_V.AUTO
@@ -162,18 +166,19 @@ class LunosFan(FanEntity):
                     volts = LUNOS_FAN_V.STAGE_7
                 case 8:
                     volts = LUNOS_FAN_V.STAGE_8
-                    
-            if self._attr_oscillating and volts >= LUNOS_FAN_V.STAGE_1:
-                    volts += LUNOS_FAN_V.SUMMER_OFFSET
-        else:
-            volts = LUNOS_FAN_V.STAGE_0
-        
+
+            if not self.oscillating and volts >= LUNOS_FAN_V.STAGE_1:
+                volts += LUNOS_FAN_V.SUMMER_OFFSET
+
         self._set_voltage(volts)
-        
+
     def _set_voltage(self, volts) -> None:
+        _LOGGER.error("setting volts: %i", volts)
+
         match self._output:
             case 1:
+                _LOGGER.error("output 1")
                 self._monarco._tx_data.aout1 = aout_volts_to_u16(volts)
             case 2:
+                _LOGGER.error("output 2")
                 self._monarco._tx_data.aout2 = aout_volts_to_u16(volts)
- 
