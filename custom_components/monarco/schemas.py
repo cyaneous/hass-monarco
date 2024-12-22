@@ -49,11 +49,11 @@ CONFIG_SCHEMA = vol.Schema({
     vol.Required(CONF_WATCHDOG_TIMEOUT, default=DEFAULT_WATCHDOG_TIMEOUT): cv.positive_int,
     "analog_output_1": section(
         AO1_SCHEMA,
-        {"collapsed": True},
+        {"collapsed": False},
     ),
     "analog_output_2": section(
         AO2_SCHEMA,
-        {"collapsed": True},
+        {"collapsed": False},
     ),
 }, extra=vol.ALLOW_EXTRA)
 
