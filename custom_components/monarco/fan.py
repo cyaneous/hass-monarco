@@ -1,6 +1,6 @@
 """Fan entity for the Monarco integration."""
 
-from typing import Optional, Any
+from typing import Any
 import math
 import logging
 
@@ -113,7 +113,7 @@ class LunosFan(FanEntity):
             model=model,
             identifiers={(DOMAIN, f"AO{output}")},
         )
-        
+
         match self._model:
             case DeviceModel.LUNOS_E2:
                 self._presets = LUNOS_E2_PRESETS
@@ -126,9 +126,8 @@ class LunosFan(FanEntity):
 
     async def async_turn_on(
         self,
-        speed: Optional[str] = None,
-        percentage: Optional[int] = None,
-        preset_mode: Optional[str] = None,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
         **kwargs: Any
     ) -> None:
         """Turn on the fan."""
