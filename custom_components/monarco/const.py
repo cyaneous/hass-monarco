@@ -1,5 +1,8 @@
 """Constants for the Monarco integration."""
 
+from enum import StrEnum
+
+
 DOMAIN = "monarco"
 
 DEFAULT_SPI_DEVICE = "0.0"
@@ -18,6 +21,9 @@ CONF_AO2_DEVICE = "analog_output_2_device"
 MANUFACTURER_MONARCO = "Monarco"
 MANUFACTURER_LUNOS = "Lunos"
 
-DEVICE_MODEL_NONE = "None"
-DEVICE_MODEL_LUNOS_E2 = "Lunos e2"
-DEVICE_MODEL_LUNOS_EGO = "Lunos ego"
+class DeviceModel(StrEnum):
+    """Enum representing a device model."""
+
+    NONE = "None"
+    LUNOS_E2 = "Lunos e2"
+    LUNOS_EGO = "Lunos ego"

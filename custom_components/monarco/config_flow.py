@@ -22,8 +22,7 @@ from .const import (
     CONF_AO2_NAME,
     CONF_AO2_DEVICE,
     MANUFACTURER_LUNOS,
-    DEVICE_MODEL_LUNOS_E2,
-    DEVICE_MODEL_LUNOS_EGO,
+    DeviceModel,
 )
 
 _LOGGER = logging.getLogger(__name__)

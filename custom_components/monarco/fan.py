@@ -21,13 +21,12 @@ from .const import (
     CONF_AO2_NAME,
     CONF_AO2_DEVICE,
     MANUFACTURER_LUNOS,
-    DEVICE_MODEL_LUNOS_E2,
-    DEVICE_MODEL_LUNOS_EGO,
+    DeviceModel,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-class LUNOS_FAN_V:
+class LunosFanVoltage:
     """Fan stage to voltage map for Lunos fans."""
     AUTO = 0.0    # 0.0 - 0.4 (the controller works independently, according to internal sensors)
     STAGE_0 = 0.7 # 0.6 - 0.9 (off)
@@ -42,17 +41,17 @@ class LUNOS_FAN_V:
     SUMMER_OFFSET = 5.0 # +5.0, no oscillation
 
 LUNOS_E2_PRESETS = {
-    "Low": LUNOS_FAN_V.STAGE_2,
-    "Medium": LUNOS_FAN_V.STAGE_5,
-    "High": LUNOS_FAN_V.STAGE_7,
-    "Boost": LUNOS_FAN_V.STAGE_8
+    "Low": LunosFanVoltage.STAGE_2,
+    "Medium": LunosFanVoltage.STAGE_5,
+    "High": LunosFanVoltage.STAGE_7,
+    "Boost": LunosFanVoltage.STAGE_8
 }
 
 LUNOS_EGO_PRESETS = {
-    "Low": LUNOS_FAN_V.STAGE_2,
-    "Medium": LUNOS_FAN_V.STAGE_6,
-    "High": LUNOS_FAN_V.STAGE_7,
-    "Boost (No HR)": LUNOS_FAN_V.STAGE_8,
+    "Low": LunosFanVoltage.STAGE_2,
+    "Medium": LunosFanVoltage.STAGE_6,
+    "High": LunosFanVoltage.STAGE_7,
+    "Boost (No HR)": LunosFanVoltage.STAGE_8,
 }
 
 async def async_setup_entry(
@@ -68,13 +67,13 @@ async def async_setup_entry(
     fans = []
 
     device = config.get(CONF_AO1_DEVICE)
-    if device in (DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO):
+    if device in (DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO):
         name = config.get(CONF_AO1_NAME)
         fan = LunosFan(name, device, monarco, 1)
         fans.append(fan)
 
     device = config.get(CONF_AO2_DEVICE)
-    if device in (DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO):
+    if device in (DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO):
         name = config.get(CONF_AO2_NAME)
         fan = LunosFan(name, device, monarco, 2)
         fans.append(fan)
@@ -115,10 +114,11 @@ class LunosFan(FanEntity):
             identifiers={(DOMAIN, f"AO{output}")},
         )
         
-        if self._model == DEVICE_MODEL_LUNOS_E2:
-            self._presets = LUNOS_E2_PRESETS
-        elif self._model == DEVICE_MODEL_LUNOS_EGO:
-            self._presets = LUNOS_EGO_PRESETS
+        match self._model:
+            case DeviceModel.LUNOS_E2:
+                self._presets = LUNOS_E2_PRESETS
+            case DeviceModel.LUNOS_EGO:
+                self._presets = LUNOS_EGO_PRESETS
 
         self._attr_preset_modes = list(self._presets)
 
@@ -178,14 +178,14 @@ class LunosFan(FanEntity):
         return int(100 / len(self._presets))
 
     def _update_output(self) -> None:
-        volts = LUNOS_FAN_V.AUTO
+        volts = LunosFanVoltage.AUTO
 
         if self.is_on:
             preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), self.percentage))
             volts = list(self._presets.values())[preset_index-1]
 
-            if not self.oscillating and volts >= LUNOS_FAN_V.STAGE_1:
-                volts += LUNOS_FAN_V.SUMMER_OFFSET
+            if not self.oscillating and volts >= LunosFanVoltage.STAGE_1:
+                volts += LunosFanVoltage.SUMMER_OFFSET
 
         self._set_output_voltage(volts)
 

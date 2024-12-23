@@ -17,9 +17,7 @@ from .const import (
     CONF_AO1_DEVICE,
     CONF_AO2_NAME,
     CONF_AO2_DEVICE,
-    DEVICE_MODEL_NONE,
-    DEVICE_MODEL_LUNOS_E2,
-    DEVICE_MODEL_LUNOS_EGO,
+    DeviceModel,
 )
 
 
@@ -27,7 +25,7 @@ from .const import (
 #     vol.Required(CONF_AO1_NAME): cv.string,
 #     CONF_AO1_DEVICE: selector({
 #         "select": {
-#             "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+#             "options": [DeviceModel.NONE, DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO]
 #         }
 #     })
 # })
@@ -36,7 +34,7 @@ from .const import (
 #     vol.Required(CONF_AO2_NAME): cv.string,
 #     CONF_AO2_DEVICE: selector({
 #         "select": {
-#             "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+#             "options": [DeviceModel.NONE, DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO]
 #         }
 #     })
 # })
@@ -50,13 +48,13 @@ CONFIG_SCHEMA = vol.Schema({
     vol.Required(CONF_AO1_NAME): cv.string,
     CONF_AO1_DEVICE: selector({
         "select": {
-            "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+            "options": [DeviceModel.NONE, DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO]
         }
     }),
     vol.Required(CONF_AO2_NAME): cv.string,
     CONF_AO2_DEVICE: selector({
         "select": {
-            "options": [DEVICE_MODEL_NONE, DEVICE_MODEL_LUNOS_E2, DEVICE_MODEL_LUNOS_EGO]
+            "options": [DeviceModel.NONE, DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO]
         }
     })
     # "analog_output_1": section(
