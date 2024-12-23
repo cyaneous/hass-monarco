@@ -1,15 +1,20 @@
 """Configuratiion flow for the Monarco integration."""
 
 from typing import Any
+from collections.abc import Mapping
+import copy
 import logging
 
+import voluptuous as vol
+
+from homeassistant.core import callback
 from homeassistant.config_entries import (
     ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
     FlowResult,
 )
-from homeassistant.core import callback
+from homeassistant.data_entry_flow import section
 
 from . import schemas
 from .const import (
@@ -17,10 +22,11 @@ from .const import (
     CONF_SPI_DEVICE,
     CONF_SPI_CLKFREQ,
     CONF_WATCHDOG_TIMEOUT,
-    CONF_AO1_NAME,
-    CONF_AO1_DEVICE,
-    CONF_AO2_NAME,
-    CONF_AO2_DEVICE,
+    CONF_UPDATE_INTERVAL,
+    CONF_ANALOG_OUTPUT_1,
+    CONF_ANALOG_OUTPUT_2,
+    CONF_NAME,
+    CONF_DEVICE,
     MANUFACTURER_LUNOS,
     DeviceModel,
 )
@@ -40,8 +46,8 @@ class MonarcoConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
 
         if user_input is not None:
-            # await self.async_set_unique_id("monarco")
-            # self._abort_if_unique_id_configured()
+            await self.async_set_unique_id("monarco")
+            self._abort_if_unique_id_configured()
             return self.async_create_entry(title="Monarco", data=user_input)
 
         return self.async_show_form(
@@ -68,9 +74,7 @@ class MonarcoOptionsFlow(OptionsFlow):
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input, options=self.config_entry.options
             )
-            
-            _LOGGER.info("user_input: %s", user_input)
-            
+
             # reload updated config entries
             await self.hass.config_entries.async_reload(self.config_entry.entry_id)
             self.async_abort(reason="Configuration updated.")

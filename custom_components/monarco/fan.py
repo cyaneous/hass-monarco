@@ -1,6 +1,7 @@
 """Fan entity for the Monarco integration."""
 
 from typing import Any
+from enum import Enum
 import math
 import logging
 
@@ -16,15 +17,39 @@ from .monarco_hat import Monarco, aout_volts_to_u16
 from . import MHConfigEntry
 from .const import (
     DOMAIN,
-    CONF_AO1_NAME,
-    CONF_AO1_DEVICE,
-    CONF_AO2_NAME,
-    CONF_AO2_DEVICE,
+    CONF_ANALOG_OUTPUT_1,
+    CONF_ANALOG_OUTPUT_2,
+    CONF_NAME,
+    CONF_DEVICE,
     MANUFACTURER_LUNOS,
     DeviceModel,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: MHConfigEntry,
+    async_add_entities: AddEntitiesCallback
+):
+    """Set up the Monarco Fan platform."""
+
+    config = config_entry.data
+    monarco = config_entry.runtime_data.monarco
+
+    _LOGGER.error("config %s", config)
+
+    fans = []
+    output_configs = [config.get(CONF_ANALOG_OUTPUT_1), config.get(CONF_ANALOG_OUTPUT_2)]
+    for output, output_config in enumerate(output_configs):
+        device = output_config.get(CONF_DEVICE)
+        match device:
+            case DeviceModel.LUNOS_E2 | DeviceModel.LUNOS_EGO:
+                name = output_config.get(CONF_NAME)
+                fan = LunosFan(name, device, monarco, output+1)
+                fans.append(fan)
+
+    async_add_entities(fans)
 
 class LunosFanVoltage:
     """Fan stage to voltage map for Lunos fans."""
@@ -54,31 +79,6 @@ LUNOS_EGO_PRESETS = {
     "Boost (No HR)": LunosFanVoltage.STAGE_8,
 }
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: MHConfigEntry,
-    async_add_entities: AddEntitiesCallback
-):
-    """Set up the Monarco Fan platform."""
-
-    config = config_entry.data
-    monarco = config_entry.runtime_data.monarco
-
-    fans = []
-
-    device = config.get(CONF_AO1_DEVICE)
-    if device in (DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO):
-        name = config.get(CONF_AO1_NAME)
-        fan = LunosFan(name, device, monarco, 1)
-        fans.append(fan)
-
-    device = config.get(CONF_AO2_DEVICE)
-    if device in (DeviceModel.LUNOS_E2, DeviceModel.LUNOS_EGO):
-        name = config.get(CONF_AO2_NAME)
-        fan = LunosFan(name, device, monarco, 2)
-        fans.append(fan)
-
-    async_add_entities(fans)
 
 class LunosFan(FanEntity):
     """Fan entity represneting a Lunos fan."""

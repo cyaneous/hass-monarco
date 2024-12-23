@@ -1,9 +1,5 @@
 {
     "config": {
-      "abort": {
-        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
-      },
-      "flow_title": "Monarco HAT",
       "step": {
         "user": {
           "title": "Configure Monarco HAT",
@@ -11,24 +7,36 @@
             "spi_device": "SPI device",
             "spi_clkfreq": "SPI clock frequency",
             "watchdog_timeout": "Watchdog timeout",
-            "analog_output_1_name": "Analog output 1 name",
-            "analog_output_1_device": "Analog output 1 device",
-            "analog_output_2_name": "Analog output 2 name",
-            "analog_output_2_device": "Analog output 2 device"
+            "update_interval": "Update interval",
           },
-          "section": {
+          "data_description": {
+            "spi_device": "The SPI interface to use.",
+            "spi_clkfreq": "The SPI clock frequency to use.",
+            "update_interval": "The interval at which the integration communicates with the Monarco HAT over SPI. If using the watchdog, set this to a value of 0.1 (100ms) or lower to appease the watchdog.",
+            "watchdog_timeout": "Seconds of no communication after which the Monarco HAT watchdog will power-cycle the Raspberry Pi. Set to 0 to disable.",
+          },
+          "sections": {
             "analog_output_1": {
-              "name": "Analog Output 1"
+              "name": "Analog Output 1",
+              "data": {
+                "name": "Name",
+                "device": "Attached device"                    
+              }
             },
             "analog_output_2": {
-              "name": "Analog Output 2"
+              "name": "Analog Output 2",
+              "data": {
+                "name": "Name",
+                "device": "Attached device"                    
+              }
             }
           }
         }
       },
       "error": {
-        "invalid_input": "Invalid Input",
-        "invalid_output": "Invalid Output"
+      },
+      "abort": {
+        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
       }
     }
   }
