@@ -37,8 +37,6 @@ async def async_setup_entry(
     config = config_entry.data
     monarco = config_entry.runtime_data.monarco
 
-    _LOGGER.error("config %s", config)
-
     fans = []
     output_configs = [config.get(CONF_ANALOG_OUTPUT_1), config.get(CONF_ANALOG_OUTPUT_2)]
     for output, output_config in enumerate(output_configs):
