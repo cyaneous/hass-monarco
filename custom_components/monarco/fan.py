@@ -159,8 +159,8 @@ class LunosFan(FanEntity):
     async def async_set_preset_mode(self, preset: str) -> None:
         """Set the preset mode"""
         
-        volts = self._presets[preset]
-        percentage = math.ceil(ranged_value_to_percentage((1, len(self._presets)), volts))
+        preset_index = self._presets.index(preset)
+        percentage = math.ceil(ranged_value_to_percentage((1, len(self._presets)), preset_index))
         await self.async_set_percentage(percentage)
 
     async def async_oscillate(self, oscillating: bool) -> None:
