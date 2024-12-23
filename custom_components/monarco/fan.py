@@ -1,6 +1,7 @@
 """Fan entity for the Monarco integration."""
 
 from typing import Optional, Any
+import math
 import logging
 
 from homeassistant.exceptions import ServiceValidationError
@@ -94,8 +95,8 @@ class LunosFan(FanEntity):
         | FanEntityFeature.PRESET_MODE
     )
     _attr_percentage = 0
-    _attr_oscillating = True
     _attr_preset_mode = None
+    _attr_oscillating = True
     
     _presets: dict[str, float] = {}
 
@@ -149,7 +150,7 @@ class LunosFan(FanEntity):
 
         self._attr_percentage = percentage
         if percentage > 0:
-            preset_index = round(percentage_to_ranged_value((1, len(self._presets)), percentage))
+            preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), percentage))
             self._attr_preset_mode = list(self._presets)[preset_index-1]
         else:
             self._attr_preset_mode = None
@@ -159,9 +160,9 @@ class LunosFan(FanEntity):
     async def async_set_preset_mode(self, preset: str) -> None:
         """Set the preset mode"""
         
-        if preset_index := list(self._presets.keys()).index(preset):
-            percentage = ranged_value_to_percentage((1, len(self._presets)), preset_index+1)
-            await self.async_set_percentage(percentage)
+        preset_index = list(self._presets.keys()).index(preset)
+        percentage = ranged_value_to_percentage((1, len(self._presets)), preset_index+1)
+        await self.async_set_percentage(percentage)
 
     async def async_oscillate(self, oscillating: bool) -> None:
         """Oscillate the fan."""
@@ -181,16 +182,15 @@ class LunosFan(FanEntity):
 
         if self.is_on:
             preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), self.percentage))
-            _LOGGER.error("preset index: %i", preset_index)
-            volts = list(self._presets.values())[preset_index]
+            volts = list(self._presets.values())[preset_index-1]
 
             if not self.oscillating and volts >= LUNOS_FAN_V.STAGE_1:
                 volts += LUNOS_FAN_V.SUMMER_OFFSET
 
         self._set_output_voltage(volts)
 
-    def _set_output_voltage(self, volts) -> None:
-        _LOGGER.error("setting volts: %i", volts)
+    def _set_output_voltage(self, volts: float) -> None:
+        _LOGGER.debug("setting volts: %f on output: %i", volts, self._output)
 
         match self._output:
             case 1:
