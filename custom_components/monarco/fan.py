@@ -1,8 +1,6 @@
 """Fan entity for the Monarco integration."""
 
 from typing import Optional, Any
-from enum import IntEnum
-import math
 import logging
 
 from homeassistant.exceptions import ServiceValidationError
@@ -28,7 +26,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-class LUNOS_FAN_V(IntEnum):
+class LUNOS_FAN_V:
     """Fan stage to voltage map for Lunos fans."""
     AUTO = 0.0    # 0.0 - 0.4 (the controller works independently, according to internal sensors)
     STAGE_0 = 0.7 # 0.6 - 0.9 (off)
@@ -151,7 +149,7 @@ class LunosFan(FanEntity):
 
         self._attr_percentage = percentage
         if percentage > 0:
-            preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), percentage))
+            preset_index = round(percentage_to_ranged_value((1, len(self._presets)), percentage))
             self._attr_preset_mode = list(self._presets)[preset_index-1]
         else:
             self._attr_preset_mode = None
@@ -162,7 +160,7 @@ class LunosFan(FanEntity):
         """Set the preset mode"""
         
         if preset_index := list(self._presets.keys()).index(preset):
-            percentage = math.ceil(ranged_value_to_percentage((1, len(self._presets)), preset_index+1))
+            percentage = ranged_value_to_percentage((1, len(self._presets)), preset_index+1)
             await self.async_set_percentage(percentage)
 
     async def async_oscillate(self, oscillating: bool) -> None:
