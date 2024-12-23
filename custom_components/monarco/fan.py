@@ -144,24 +144,26 @@ class LunosFan(FanEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the fan."""
 
-        self._attr_preset_mode = None
         await self.async_set_percentage(0)
 
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
 
         self._attr_percentage = percentage
-        preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), percentage))
-        self._attr_preset_mode = list(self._presets)[preset_index]
+        if percentage > 0:
+            preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), percentage))
+            self._attr_preset_mode = list(self._presets)[preset_index-1]
+        else:
+            self._attr_preset_mode = None
         self.async_write_ha_state()
         self._update_output()
 
     async def async_set_preset_mode(self, preset: str) -> None:
         """Set the preset mode"""
         
-        preset_index = self._presets.keys().index(preset)
-        percentage = math.ceil(ranged_value_to_percentage((1, len(self._presets)), preset_index))
-        await self.async_set_percentage(percentage)
+        if preset_index := list(self._presets.keys()).index(preset):
+            percentage = math.ceil(ranged_value_to_percentage((1, len(self._presets)), preset_index+1))
+            await self.async_set_percentage(percentage)
 
     async def async_oscillate(self, oscillating: bool) -> None:
         """Oscillate the fan."""
@@ -173,7 +175,7 @@ class LunosFan(FanEntity):
     @property
     def percentage_step(self) -> int:
         """Get the percentage step delta."""
-        
+
         return int(100 / len(self._presets))
 
     def _update_output(self) -> None:
