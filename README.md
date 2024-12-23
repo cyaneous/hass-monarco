@@ -14,5 +14,6 @@ Simply install via hacs or custom_components and your thermostat should be autom
 
 ## TODO
 
+- configuration/options UI improvements and error checking
 - test/fully implement SDC support in monarco_hat
 - implement setting Watchdog Timeout SDC
