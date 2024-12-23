@@ -10,7 +10,11 @@
           "data": {
             "spi_device": "SPI device",
             "spi_clkfreq": "SPI clock frequency",
-            "watchdog_timeout": "Watchdog Timeout"
+            "watchdog_timeout": "Watchdog timeout",
+            "analog_output_1_name": "Analog output 1 name",
+            "analog_output_1_device": "Analog output 1 device",
+            "analog_output_2_name": "Analog output 2 name",
+            "analog_output_2_device": "Analog output 2 device"
           },
           "section": {
             "analog_output_1": {
