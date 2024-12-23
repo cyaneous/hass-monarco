@@ -159,7 +159,7 @@ class LunosFan(FanEntity):
     async def async_set_preset_mode(self, preset: str) -> None:
         """Set the preset mode"""
         
-        preset_index = self._presets.index(preset)
+        preset_index = self._presets.keys().index(preset)
         percentage = math.ceil(ranged_value_to_percentage((1, len(self._presets)), preset_index))
         await self.async_set_percentage(percentage)
 
