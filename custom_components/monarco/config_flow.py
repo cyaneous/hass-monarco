@@ -86,5 +86,5 @@ class MonarcoOptionsFlow(OptionsFlow):
             step_id="init",
             data_schema=self.add_suggested_values_to_schema(
                 schemas.OPTIONS_SCHEMA, self.config_entry.data
-            ),
+            )
         )

@@ -37,8 +37,8 @@ CONFIG_SCHEMA = vol.Schema({
     vol.Required(CONF_SPI_CLKFREQ, default=DEFAULT_SPI_CLKFREQ): cv.positive_int,
     vol.Required(CONF_WATCHDOG_TIMEOUT, default=DEFAULT_WATCHDOG_TIMEOUT): cv.positive_int,
     vol.Required(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): vol.All(vol.Coerce(float), vol.Range(min=0.05, max=1.0)),
-    vol.Required(CONF_ANALOG_OUTPUT_1): section(AO_SCHEMA, {"collapsed": False}),
-    vol.Required(CONF_ANALOG_OUTPUT_2): section(AO_SCHEMA, {"collapsed": False}),
+    vol.Required(CONF_ANALOG_OUTPUT_1): section(AO_SCHEMA, {"collapsed": True}),
+    vol.Required(CONF_ANALOG_OUTPUT_2): section(AO_SCHEMA, {"collapsed": True}),
 }, extra=vol.ALLOW_EXTRA)
 
 
