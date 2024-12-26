@@ -9,6 +9,5 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "loggers": ["monarco"],
-  "requirements": ["spidev"],
-  "homeassistant": "2024.12.1"
+  "requirements": ["spidev"]
 }
