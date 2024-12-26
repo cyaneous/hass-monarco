@@ -1,7 +1,6 @@
 {
     "name": "Monarco",
     "homeassistant": "2024.12.1",
-    "domains": ["fan"],
     "render_readme": true,
     "issue_tracker": "https://github.com/cyaneous/mitsubishi_matouch/issues"
 }
