@@ -11,7 +11,7 @@
         },
         "data_description": {
           "watchdog_timeout": "Seconds of no communication after which the Monarco HAT watchdog will power-cycle the Raspberry Pi. Set to 0 to disable.",
-          "update_interval": "The interval at which the integration communicates with the Monarco HAT over SPI. If using the watchdog, set this to a value of 0.1 (100ms) or lower to appease the watchdog."
+          "update_interval": "The interval at which the integration communicates with the Monarco HAT over SPI."
         },
         "sections": {
           "analog_output_1": {
@@ -49,7 +49,7 @@
         },
         "data_description": {
           "watchdog_timeout": "Seconds of no communication after which the Monarco HAT watchdog will power-cycle the Raspberry Pi. Set to 0 to disable.",
-          "update_interval": "The interval at which the integration communicates with the Monarco HAT over SPI. If using the watchdog, set this to a value of 0.1 (100ms) or lower to appease the watchdog."
+          "update_interval": "The interval at which the integration communicates with the Monarco HAT over SPI."
         },
         "sections": {
           "analog_output_1": {
