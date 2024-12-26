@@ -6,6 +6,7 @@
   "dependencies": [],
   "documentation": "https://github.com/cyaneous/monarco",
   "integration_type": "device",
+  "issue_tracker": "https://github.com/cyaneous/monarco/issues",
   "iot_class": "local_polling",
   "loggers": ["monarco"],
   "requirements": ["spidev"],
