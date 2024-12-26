@@ -1,7 +1,6 @@
 {
   "domain": "monarco",
   "name": "Monarco",
-  "version": "0.1.0",
   "codeowners": ["@lupinglade"],
   "config_flow": true,
   "dependencies": [],
@@ -9,5 +8,6 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "loggers": ["monarco"],
-  "requirements": ["spidev"]
+  "requirements": ["spidev"],
+  "version": "0.1.0"
 }
