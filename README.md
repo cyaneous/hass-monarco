@@ -17,3 +17,7 @@ Simply install via hacs or custom_components and your thermostat should be autom
 - configuration/options UI improvements and error checking
 - test/fully implement SDC support in monarco_hat
     - implement setting Watchdog Timeout SDC
+
+## Reference
+
+https://github.com/monarco/monarco-hat-documentation/blob/master/Monarco_HAT_SPI_Protocol.md
