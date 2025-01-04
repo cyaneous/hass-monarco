@@ -64,6 +64,7 @@ class LunosFanVoltage:
     SUMMER_OFFSET = 5.0 # +5.0, no oscillation
 
 LUNOS_E2_PRESETS = {
+    "Auto": LunosFanVoltage.AUTO,
     "Low": LunosFanVoltage.STAGE_2,
     "Medium": LunosFanVoltage.STAGE_5,
     "High": LunosFanVoltage.STAGE_7,
@@ -71,6 +72,7 @@ LUNOS_E2_PRESETS = {
 }
 
 LUNOS_EGO_PRESETS = {
+    "Auto": LunosFanVoltage.AUTO,
     "Low": LunosFanVoltage.STAGE_2,
     "Medium": LunosFanVoltage.STAGE_6,
     "High": LunosFanVoltage.STAGE_7,
@@ -175,7 +177,7 @@ class LunosFan(FanEntity):
         return int(100 / len(self._presets))
 
     def _update_output(self) -> None:
-        volts = LunosFanVoltage.AUTO
+        volts = LunosFanVoltage.STAGE_0
 
         if self.is_on:
             preset_index = math.ceil(percentage_to_ranged_value((1, len(self._presets)), self.percentage))
